@@ -11,7 +11,7 @@ CREATE TABLE `users` (
 import { faker } from "@faker-js/faker";
 import md5 from "md5";
 
-export function createUser() {
+function createUser() {
   return {
     email: faker.internet.email(),
     name: faker.internet.username(),
@@ -22,7 +22,7 @@ export function createUser() {
     ]),
   };
 }
-export function createUserTeacher() {
+function createUserTeacher() {
   return {
     email: faker.internet.email(),
     name: faker.internet.username(),
@@ -30,7 +30,7 @@ export function createUserTeacher() {
     role: "teacher",
   };
 }
-export function createUserAdmin(name) {
+function createUserAdmin(name) {
   return {
     email: name + "@gmail.com",
     name: name,
@@ -38,11 +38,42 @@ export function createUserAdmin(name) {
     role: "admin",
   };
 }
-export function createUserEditor(name) {
+function createUserEditor(name) {
   return {
     email: name + "@gmail.com",
     name: name,
     password: md5("123"),
     role: "editor",
   };
+}
+
+export default function createAllUsers() {
+  users = [];
+  const usersCount = 52;
+  const teachersCount = 7;
+  const adminsCount = 1;
+  const editorsCount = 1;
+
+  for (let i = 0; i < usersCount; i++) {
+    users.push(createUser());
+  }
+
+  for (let i = 0; i < teachersCount; i++) {
+    users.push(createUserTeacher());
+  }
+
+  for (let i = 0; i < adminsCount; i++) {
+    users.push(createUserAdmin('Šrekas'));
+  }
+
+  for (let i = 0; i < editorsCount; i++) {
+    users.push(createUserEditor('Asilas'));
+  }
+
+  return {
+    users,
+    teacherIds: [usersCount + 1, usersCount + 1 + teachersCount],
+    adminId: usersCount + 2 + teachersCount,
+    editorId: usersCount + 3 + teachersCount,
+  }
 }

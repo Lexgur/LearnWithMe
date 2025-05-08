@@ -1,5 +1,6 @@
 import { faker } from '@faker-js/faker';
 import { createPool } from 'mysql2/promise';
+import { createAllUsers } from './user.js';
 
 (async () => {
     console.log('Seeding database...');
@@ -16,6 +17,8 @@ import { createPool } from 'mysql2/promise';
         const con = await pool.getConnection();
         console.log('Connected to database.');
 
+        const {users, teachersIds, adminId, editorId} = createAllUsers();
+        
         let sql;
         // TABLE DROPS
         const drops = [
@@ -36,6 +39,10 @@ import { createPool } from 'mysql2/promise';
             await con.query(sql);
             console.log(`Dropped ${table} table if it existed.`);
         }
+
+        //TABLE CREATIONS
+
+
 
         //TODO: Add your faker-based seeding logic here
 
