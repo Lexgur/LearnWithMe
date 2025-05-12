@@ -48,7 +48,7 @@ function createUserEditor(name) {
 }
 
 export default function createAllUsers() {
-  users = [];
+  const users = [];
   const usersCount = 52;
   const teachersCount = 7;
   const adminsCount = 1;
