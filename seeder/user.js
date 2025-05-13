@@ -75,5 +75,6 @@ export default function createAllUsers() {
     teacherIds: [usersCount + 1, usersCount + 1 + teachersCount],
     adminId: usersCount + 2 + teachersCount,
     editorId: usersCount + 3 + teachersCount,
+    usersCount,
   }
 }

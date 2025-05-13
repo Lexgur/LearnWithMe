@@ -1,8 +1,8 @@
-import { faker } from "@faker-js/faker";
 import { createPool } from "mysql2/promise";
 import createAllUsers from "./user.js";
 import createAllTopics from "./topic.js";
 import createAllCourses from "./course.js";
+import createAllParts from "./part.js";
 
 (async () => {
   console.log("Seeding database...");
@@ -19,9 +19,10 @@ import createAllCourses from "./course.js";
     const con = await pool.getConnection();
     console.log("Connected to database.");
 
-    const { users, teacherIds, adminId, editorId } = createAllUsers();
+    const { users, teacherIds, adminId, editorId, usersCount } = createAllUsers();
     const { topics, topicsCount } = createAllTopics();
     const { courses, coursesCount } = createAllCourses(teacherIds, topicsCount);
+    const { coursePartCount, parts } = createAllParts(coursesCount);
 
     let sql;
     // TABLE DROPS
