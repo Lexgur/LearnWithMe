@@ -5,30 +5,22 @@ CREATE TABLE topics (
   topic_type set('Programming','Design','Cyber Security','Game development') NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 */
-import { faker } from "@faker-js/faker";
+import { faker } from '@faker-js/faker';
 
 function createTopic() {
-  return {
-    title: faker.hacker.phrase(),
-    topic_type: faker.helpers.arrayElement([
-      'Programming',
-      'Design',
-      'Cyber Security',
-      'Game development'
-    ])
-  };
+    return {
+        title: faker.hacker.phrase(),
+        topic_type: faker.helpers.arrayElement(['Programming', 'Design', 'Cyber Security', 'Gaming'])
+    }
 }
 
-export default function createAllTopics() {
-  const topics = [];
-  const topicsCount = 11;
+export default function createAllTopic() {
+    const topics = [];
+    const topicsCount = 11;
 
-  for (let i = 0; i < topicsCount; i++) {
-    topics.push(createTopic());
-  }
+    for (let i = 0; i < topicsCount; i++) {
+        topics.push(createTopic());
+    }
 
-  return {
-    topics,
-    topicsCount
-  };
+    return { topics, topicsCount };
 }

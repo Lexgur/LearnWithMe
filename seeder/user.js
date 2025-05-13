@@ -12,69 +12,66 @@ import { faker } from "@faker-js/faker";
 import md5 from "md5";
 
 function createUser() {
+
   return {
     email: faker.internet.email(),
     name: faker.internet.username(),
-    password: md5("123"),
-    role: faker.helpers.arrayElement([
-      "subscriber",
-      "free",
-    ]),
-  };
+    password: md5('123'),
+    role: faker.helpers.arrayElement(['subscriber','free'])
+  }
 }
+
 function createUserTeacher() {
+
   return {
     email: faker.internet.email(),
     name: faker.internet.username(),
-    password: md5("123"),
-    role: "teacher",
-  };
+    password: md5('123'),
+    role: 'teacher'
+  }
 }
+
 function createUserAdmin(name) {
+
   return {
-    email: name + "@gmail.com",
+    email: name + '@gmail.com',
     name: name,
-    password: md5("123"),
-    role: "admin",
-  };
+    password: md5('123'),
+    role: 'admin'
+  }
 }
+
 function createUserEditor(name) {
+
   return {
-    email: name + "@gmail.com",
+    email: name + '@gmail.com',
     name: name,
-    password: md5("123"),
-    role: "editor",
-  };
+    password: md5('123'),
+    role: 'editor'
+  }
 }
 
 export default function createAllUsers() {
   const users = [];
   const usersCount = 52;
   const teachersCount = 7;
-  const adminsCount = 1;
-  const editorsCount = 1;
 
   for (let i = 0; i < usersCount; i++) {
-    users.push(createUser());
+      users.push(createUser());
   }
 
   for (let i = 0; i < teachersCount; i++) {
-    users.push(createUserTeacher());
+      users.push(createUserTeacher());
   }
 
-  for (let i = 0; i < adminsCount; i++) {
-    users.push(createUserAdmin('Šrekas'));
-  }
-
-  for (let i = 0; i < editorsCount; i++) {
-    users.push(createUserEditor('Asilas'));
-  }
+  users.push(createUserAdmin('briedis'));
+  users.push(createUserEditor('bebras'));
 
   return {
     users,
-    teacherIds: [usersCount + 1, usersCount + 1 + teachersCount],
+    teachersIds: [usersCount + 1, usersCount + 1 + teachersCount],
     adminId: usersCount + 2 + teachersCount,
     editorId: usersCount + 3 + teachersCount,
-    usersCount,
+    usersCount
   }
 }

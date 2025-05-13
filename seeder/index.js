@@ -1,8 +1,10 @@
 import { createPool } from "mysql2/promise";
 import createAllUsers from "./user.js";
-import createAllTopics from "./topic.js";
+import createAllTopic from "./topic.js";
 import createAllCourses from "./course.js";
 import createAllParts from "./part.js";
+import createAllUsersCourses from "./userCourses.js";
+import createAllCertificates from "./certificate.js";
 
 (async () => {
   console.log("Seeding database...");
@@ -19,10 +21,15 @@ import createAllParts from "./part.js";
     const con = await pool.getConnection();
     console.log("Connected to database.");
 
-    const { users, teacherIds, adminId, editorId, usersCount } = createAllUsers();
-    const { topics, topicsCount } = createAllTopics();
-    const { courses, coursesCount } = createAllCourses(teacherIds, topicsCount);
-    const { coursePartCount, parts } = createAllParts(coursesCount);
+    const { users, teachersIds, adminId, editorId, usersCount } = createAllUsers();
+    const { topics, topicsCount } = createAllTopic();
+    const { courses, coursesCount } = createAllCourses(teachersIds, topicsCount);
+    const { coursesPartCount, parts } = createAllParts(coursesCount);
+    const { finishedCourses, userCourses } = createAllUsersCourses(usersCount, coursesPartCount, coursesCount);
+    const certificates = createAllCertificates(finishedCourses);
+
+
+    console.log("Generated certificates:", certificates);
 
     let sql;
     // TABLE DROPS
@@ -75,14 +82,14 @@ import createAllParts from "./part.js";
 
     // TOPICS TABLE
 
-    sql = `
-                CREATE TABLE IF NOT EXISTS topics (
-                id int UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-                title varchar(98) NOT NULL,
-                topic_type set('Programming','Design','Cyber Security','Game development') NOT NULL
-                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-        `;
-    
+  sql = `
+        CREATE TABLE topics (
+        id int(10) UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
+       title varchar(98) NOT NULL,
+       topic_type set('Programming','Design','Cyber Security','Gaming') NOT NULL
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+`;
+
     await con.query(sql);
     console.log("Topics table OK");
 
@@ -109,7 +116,7 @@ import createAllParts from "./part.js";
                 rating decimal(3,2) UNSIGNED NOT NULL
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
         `;
-    
+
     await con.query(sql);
     console.log("Courses table OK");
 
@@ -119,9 +126,77 @@ import createAllParts from "./part.js";
             VALUES ?
         `;
     await con.query(sql, [
-      courses.map((course) => [course.title, course.description, course.teacher_id, course.topic_id, course.req_plan, course.rating]),
+      courses.map((course) => [
+        course.title,
+        course.description,
+        course.teacher_id,
+        course.topic_id,
+        course.req_plan,
+        course.rating,
+      ]),
     ]);
     console.log("Courses table seed OK");
+
+    // USER COURSES TABLE
+
+    sql = `
+              CREATE TABLE IF NOT EXISTS user_courses (
+              id int UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+              user_id int UNSIGNED NOT NULL,
+              course_id int UNSIGNED DEFAULT NULL,
+              progress smallint UNSIGNED DEFAULT NULL,
+              finished int NOT NULL DEFAULT '0'
+              ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+        `;
+
+    await con.query(sql);
+    console.log("User courses table OK");
+
+    sql = `
+            INSERT INTO user_courses
+            (user_id, course_id, progress, finished)
+            VALUES ?
+        `;
+
+    await con.query(sql, [
+      userCourses.map((userCourse) => [
+        userCourse.user_id,
+        userCourse.course_id,
+        userCourse.progress,
+        userCourse.finished,
+      ]),
+    ]);
+    console.log("User courses table seed OK");
+
+    // CERTIFICATES TABLE
+
+    sql = `
+                CREATE TABLE IF NOT EXISTS certificates (
+                id int UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+                user_id int UNSIGNED NOT NULL,
+                course_id int UNSIGNED DEFAULT NULL,
+                certificate_number varchar(32) NOT NULL,
+                certificate_date date NOT NULL
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+        `;
+
+    await con.query(sql);
+    console.log("Certificates table OK");
+
+    sql = `
+            INSERT INTO certificates
+            (user_id, course_id, certificate_number, certificate_date)
+            VALUES ?
+        `;
+    await con.query(sql, [
+      certificates.map((certificate) => [
+        certificate.user_id,
+        certificate.course_id,
+        certificate.certificate_number,
+        certificate.certificate_date,
+      ]),
+    ]);
+    console.log("Certificates table seed OK");
 
     //TODO: Add your faker-based seeding logic here
 

@@ -9,33 +9,26 @@ CREATE TABLE `courses` (
   `rating` decimal(3,2) UNSIGNED NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
  */
-import { faker } from "@faker-js/faker";
+import { faker } from '@faker-js/faker';
 
-function createCourse(teacherIds, topicsCount) {
-  return {
-    title: faker.book.title(),
-    description: faker.word.words({count: {min: 15, max: 150}}),
-    teacher_id: faker.number.int({min: teacherIds[0], max: teacherIds[1]}),
-    topic_id: faker.number.int({ min: 1 ,max: topicsCount }),
-    req_plan: faker.helpers.arrayElement([
-      'Free',
-      'Silver',
-      'Gold',
-    ]),
-    rating: 0
-  };
+
+function createCourse(teachersIds, topicsCount) {
+    return {
+        title: faker.book.title(),
+        description: faker.word.words({ count: { min: 15, max: 200 } }),
+        teacher_id: faker.number.int({ min: teachersIds[0], max: teachersIds[1] }),
+        topic_id: faker.number.int({ min: 1, max: topicsCount }),
+        req_plan: faker.helpers.arrayElement(['free', 'silver', 'gold']),
+        rating: 0
+    }
 }
 
-export default function createAllCourses(teacherIds, topicsCount) {
+export default function createAllCourses(teachersIds, topicsCount) {
     const courses = [];
-    const coursesCount = 27;
-
+    const coursesCount = 26;
     for (let i = 0; i < coursesCount; i++) {
-    courses.push(createCourse(teacherIds, topicsCount));
-  }
+        courses.push(createCourse(teachersIds, topicsCount));
+    }
 
-  return {
-    courses,
-    coursesCount
-  };
+    return { courses, coursesCount }
 }
