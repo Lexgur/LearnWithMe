@@ -5,6 +5,9 @@ import createAllCourses from "./course.js";
 import createAllParts from "./part.js";
 import createAllUsersCourses from "./userCourses.js";
 import createAllCertificates from "./certificate.js";
+import createAllReviews from './review.js';
+import createAllPayments from './payment.js';
+import createAllPartContents from './partContents.js';
 
 (async () => {
   console.log("Seeding database...");
@@ -27,6 +30,9 @@ import createAllCertificates from "./certificate.js";
     const { coursesPartCount, parts } = createAllParts(coursesCount);
     const { finishedCourses, userCourses } = createAllUsersCourses(usersCount, coursesPartCount, coursesCount);
     const certificates = createAllCertificates(finishedCourses);
+    const { coursesRating, reviews } = createAllReviews(userCourses);
+    const payments = createAllPayments(users);
+    const partContents = createAllPartContents(parts);
 
 
     console.log("Generated certificates:", certificates);
@@ -82,7 +88,7 @@ import createAllCertificates from "./certificate.js";
 
     // TOPICS TABLE
 
-  sql = `
+    sql = `
         CREATE TABLE topics (
         id int(10) UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
        title varchar(98) NOT NULL,
@@ -198,7 +204,109 @@ import createAllCertificates from "./certificate.js";
     ]);
     console.log("Certificates table seed OK");
 
-    //TODO: Add your faker-based seeding logic here
+    // REVIEWS
+
+    sql = `
+          CREATE TABLE reviews (
+          id int(10) UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
+          user_id int(10) UNSIGNED DEFAULT NULL,
+          course_id int(10) UNSIGNED NOT NULL,
+          rating tinyint(3) UNSIGNED NOT NULL,
+          description text NOT NULL
+          ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+          `;
+    await con.query(sql);
+    console.log('Reviews table OK');
+
+    sql = `
+          INSERT INTO reviews
+          (user_id, course_id, rating, description)
+          VALUES ?
+          `;
+    await con.query(sql, [reviews.map(review => [review.user_id, review.course_id, review.rating, review.description])]);
+    console.log('Reviews table seed OK');
+
+
+    // PAYMENTS
+
+    sql = `
+          CREATE TABLE payments (
+          id int(10) UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
+          user_id int(10) UNSIGNED NOT NULL,
+          plan set('free','silver','gold') NOT NULL,
+          end_plan datetime DEFAULT NULL
+          ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+          `;
+    await con.query(sql);
+    console.log('Payments table OK');
+
+    sql = `
+            INSERT INTO payments
+            (user_id, plan, end_plan)
+            VALUES ?
+            `;
+    await con.query(sql, [payments.map(payment => [payment.user_id, payment.plan, payment.end_plan])]);
+    console.log('Payments table seed OK');
+
+
+    // SESSIONS
+
+    sql = `
+            CREATE TABLE sessions (
+            id int(10) UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
+            user_id int(10) UNSIGNED NOT NULL,
+            token char(36) NOT NULL,
+            start_time timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+            )  ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+            `;
+    await con.query(sql);
+    console.log('Sessions table OK');
+
+    // PARTS
+
+    sql = `
+CREATE TABLE parts (
+  \`id\` int(10) UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
+  \`course_id\` int(10) UNSIGNED NOT NULL,
+  \`row_number\` tinyint(4) NOT NULL,
+  \`title\` varchar(98) NOT NULL,
+  \`description\` text NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+`;
+await con.query(sql);
+console.log('Parts table OK');
+
+sql = `
+  INSERT INTO parts
+  (\`course_id\`, \`row_number\`, \`title\`, \`description\`)
+  VALUES ?
+`;
+await con.query(sql, [parts.map(part => [part.course_id, part.row_number, part.title, part.description])]);
+console.log('Parts table seed OK');
+
+    // PART_CONTENTS
+
+   sql = `
+CREATE TABLE part_contents (
+  id int(10) UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
+  \`row_number\` tinyint(4) NOT NULL,
+  video_link varchar(250) DEFAULT NULL,
+  image_link varchar(250) DEFAULT NULL,
+  text_block text DEFAULT NULL,
+  part_id int(10) UNSIGNED NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+`;
+await con.query(sql);
+console.log('Part_contents table OK');
+
+sql = `
+INSERT INTO part_contents
+(\`row_number\`, video_link, image_link, text_block, part_id)
+VALUES ?
+`;
+await con.query(sql, [partContents.map(partContent => [partContent.row_number, partContent.video_link, partContent.image_link, partContent.text_block, partContent.part_id])]);
+console.log('Part_contents table seed OK');
+
 
     con.release();
     console.log("Database connection released.");

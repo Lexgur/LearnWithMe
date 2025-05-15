@@ -38,10 +38,10 @@ export default function createAllReviews(userCourses) {
             } else {
                 const newCount = coursesRating.get(uc.course_id).count + 1;
                 const newSum = coursesRating.get(uc.course_id).sum + rating;
-                coursesRating.set(uc.course_id, { count: newCount, sum: newSum })
+                coursesRating.set(uc.course_id, { count: newCount, sum: newSum });
             }
 
-            reviews.push(createReview(user_id, course_id, rating));
+            reviews.push(createReview(uc.user_id, uc.course_id, rating));
 
         }
 
